@@ -2,7 +2,7 @@ import asyncio
 from .fetch import download
 
 BASE_URL = "https://learn.omacom.io/2/the-omarchy-manual"
-DOCS_DIR = "/mnt/aidata/datasets/documents/omarchy/markdown"
+DOCS_DIR = "/mnt/aidata/datasets/documents/omarchy"
 
 def main():
     asyncio.run(

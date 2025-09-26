@@ -15,9 +15,6 @@ MAX_CONCURRENT_CONNECTIONS = 8
 MAX_CONNECTIONS_PER_HOST = 4
 REQUEST_TIMEOUT = 30
 
-# Streaming download configuration
-CHUNK_SIZE = 8192  # 8KB chunks for streaming downloads
-
 @dataclass
 class PageData:
     """Data extracted from a single HTML page"""
@@ -67,23 +64,15 @@ class HTMLProcessor:
                 # Update the link to point to local file
                 if href == '/2/the-omarchy-manual':
                     link['href'] = 'toc.md'
-                else:
-                    local_filename = convert_url_to_filename(href)
-                    if local_filename:
-                        link['href'] = local_filename
+                elif (local_filename := convert_url_to_filename(href)):
+                    link['href'] = local_filename
 
 
 def convert_url_to_filename(url: str) -> Optional[str]:
     """Convert URL path to local filename format"""
     parsed = urlparse(url)
-    path = parsed.path.strip('/')
-    if path:
-        if path == '2/the-omarchy-manual':
-            filename = 'toc.md'
-        else:
-            filename = Path(path).name + '.md'
-        return filename
-
+    if (path := parsed.path.strip('/')):
+        return 'toc.md' if path == '2/the-omarchy-manual' else f"{Path(path).name}.md"
     return None
 
 
@@ -194,7 +183,7 @@ async def download(
         results = await asyncio.gather(*tasks, return_exceptions=True)
  
         # Count successful downloads
-        successful = sum(1 for result in results if isinstance(result, str) and result)
+        successful = len([result for result in results if isinstance(result, str) and result])
         failed = len(results) - successful
 
     end_time = time.time()
@@ -206,4 +195,3 @@ async def download(
         print(f"Failed downloads: {failed} pages")
     print(f"Files saved to: {docs_dir}/")
     print(f"Open {docs_dir}/toc.md to view offline.")
-

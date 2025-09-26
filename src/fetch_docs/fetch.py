@@ -100,6 +100,9 @@ async def download_page(session: aiohttp.ClientSession, url: str, output_dir: st
 
         # Parse URL to get filename
         filename = convert_url_to_filename(url)
+        if not filename:
+            print(f"Could not determine filename for URL: {url}")
+            return None
         filepath = Path(output_dir) / filename
         
         ret = readabilipy.simple_json.simple_json_from_html_string(
